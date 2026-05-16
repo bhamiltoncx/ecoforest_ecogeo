@@ -258,19 +258,37 @@ MAPPING = {
         "address": None,
         "entity_type": "temperature"
     },
-    "energy_electric_year": {
+    "energy_electric_month": {
         "data_type": DataTypes.Register,
         "type": "float",
         "address": None,
         "entity_type": "energy"
     },
-    "energy_heating_year": {
+    "energy_heating_month": {
         "data_type": DataTypes.Register,
         "type": "float",
         "address": None,
         "entity_type": "energy"
     },
-    "energy_cooling_year": {
+    "energy_cooling_month": {
+        "data_type": DataTypes.Register,
+        "type": "float",
+        "address": None,
+        "entity_type": "energy"
+    },
+    "energy_electric_day": {
+        "data_type": DataTypes.Register,
+        "type": "float",
+        "address": None,
+        "entity_type": "energy"
+    },
+    "energy_heating_day": {
+        "data_type": DataTypes.Register,
+        "type": "float",
+        "address": None,
+        "entity_type": "energy"
+    },
+    "energy_cooling_day": {
         "data_type": DataTypes.Register,
         "type": "float",
         "address": None,
@@ -553,11 +571,15 @@ EASYNET_REGISTER_WRITE = {
 }
 
 # Named-field ops: response lines are KEY=HEX rather than bare hex.
-# Op 2139 – yearly energy totals (kWh, value/10)
+# Op 2140 – month-to-date energy totals (kWh, value/10)
+# Op 2137 – today's energy totals (kWh, value/10)
 EASYNET_NAMED_INDEX = {
-    "energy_electric_year": (2139, "YE"),
-    "energy_heating_year":  (2139, "YH"),
-    "energy_cooling_year":  (2139, "YAC"),
+    "energy_electric_month": (2140, "ME"),
+    "energy_heating_month":  (2140, "MH"),
+    "energy_cooling_month":  (2140, "MAC"),
+    "energy_electric_day":   (2137, "DE"),
+    "energy_heating_day":    (2137, "DH"),
+    "energy_cooling_day":    (2137, "DAC"),
 }
 
 
@@ -652,7 +674,8 @@ class EcoGeoApi(EcoforestApi):
         op2149 = await self._bulk(2149)
         op2150 = await self._bulk(2150)
         op2151 = await self._bulk(2151)
-        op2139 = await self._bulk(2139)
+        op2137 = await self._bulk(2137)
+        op2140 = await self._bulk(2140)
         alarm_code = await self._get_alarm_code()
 
         raw = {2148: op2148, 2149: op2149, 2150: op2150, 2151: op2151}
@@ -677,7 +700,7 @@ class EcoGeoApi(EcoforestApi):
             if MAPPING[name].get("entity_type") == "temperature" and v is not None and v <= -50.0:
                 device_info[name] = None
 
-        named_raw = {2139: op2139}
+        named_raw = {2137: op2137, 2140: op2140}
         for name, (op, key) in EASYNET_NAMED_INDEX.items():
             val = self._named_value(named_raw[op], key)
             device_info[name] = self.parse_ecoforest_float(val) if val is not None else None

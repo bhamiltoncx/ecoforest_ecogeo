@@ -143,14 +143,23 @@
       "t_brine_supply": {
         "name": "Brine Supply"
       },
-      "energy_electric_year": {
-        "name": "Electricity consumed (year)"
+      "energy_electric_month": {
+        "name": "Electricity consumed (month)"
       },
-      "energy_heating_year": {
-        "name": "Heating energy (year)"
+      "energy_heating_month": {
+        "name": "Heating energy (month)"
       },
-      "energy_cooling_year": {
-        "name": "Cooling energy (year)"
+      "energy_cooling_month": {
+        "name": "Cooling energy (month)"
+      },
+      "energy_electric_day": {
+        "name": "Electricity consumed (today)"
+      },
+      "energy_heating_day": {
+        "name": "Heating energy (today)"
+      },
+      "energy_cooling_day": {
+        "name": "Cooling energy (today)"
       },
       "t_sg5": {
         "name": "SG5 temperature"

@@ -526,22 +526,37 @@ class TestNamedValue:
         assert self.api._named_value(["YAU=0001", "YA=0002"], "YA") == "0002"
 
 
-class TestYearlyEnergy:
+class TestMonthlyEnergy:
     state = asyncio.run(_EasnetApi(FIXTURE).get()).state
 
-    def test_energy_electric_year(self):
-        # YE=007D = 125 → 12.5 kWh
-        assert self.state["energy_electric_year"] == pytest.approx(12.5)
+    def test_energy_electric_month(self):
+        # ME=01F4 = 500 → 50.0 kWh
+        assert self.state["energy_electric_month"] == pytest.approx(50.0)
 
-    def test_energy_heating_year(self):
-        # YH=03E8 = 1000 → 100.0 kWh
-        assert self.state["energy_heating_year"] == pytest.approx(100.0)
+    def test_energy_heating_month(self):
+        # MH=0258 = 600 → 60.0 kWh
+        assert self.state["energy_heating_month"] == pytest.approx(60.0)
 
-    def test_energy_cooling_year(self):
-        # YAC=01F4 = 500 → 50.0 kWh
-        assert self.state["energy_cooling_year"] == pytest.approx(50.0)
+    def test_energy_cooling_month(self):
+        # MAC=04B0 = 1200 → 120.0 kWh
+        assert self.state["energy_cooling_month"] == pytest.approx(120.0)
+
+
+class TestDailyEnergy:
+    state = asyncio.run(_EasnetApi(FIXTURE).get()).state
+
+    def test_energy_electric_day(self):
+        # DE=00C8 = 200 → 20.0 kWh
+        assert self.state["energy_electric_day"] == pytest.approx(20.0)
+
+    def test_energy_heating_day(self):
+        # DH=0064 = 100 → 10.0 kWh
+        assert self.state["energy_heating_day"] == pytest.approx(10.0)
+
+    def test_energy_cooling_day(self):
+        # DAC=012C = 300 → 30.0 kWh
+        assert self.state["energy_cooling_day"] == pytest.approx(30.0)
 
     def test_missing_key_yields_none(self):
-        # fixture has no "YMISSING=" field
         bare = _BareApi()
-        assert bare._named_value(["YH=03E8"], "YMISSING") is None
+        assert bare._named_value(["DH=0064"], "DMISSING") is None
