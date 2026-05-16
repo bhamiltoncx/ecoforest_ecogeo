@@ -35,7 +35,10 @@ async def async_setup_entry(
 
     device_alias = config_entry.data[CONF_ALIAS] if CONF_ALIAS in config_entry.data else None
     entities = [
-        EcoforestSensor(coordinator, key, definition, device_alias) for key, definition in MAPPING.items() if definition["entity_type"] in SENSOR_TYPES.keys()
+        EcoforestSensor(coordinator, key, definition, device_alias)
+        for key, definition in MAPPING.items()
+        if definition["entity_type"] in SENSOR_TYPES.keys()
+        and not definition.get("is_number")
     ]
 
     async_add_entities(entities)
