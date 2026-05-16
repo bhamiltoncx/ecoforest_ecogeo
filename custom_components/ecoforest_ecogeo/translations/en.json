@@ -113,11 +113,11 @@
       "power_output": {
         "name": "Total output power"
       },
-      "t_brine_in": {
-        "name": "Brine input temperature"
+      "t_brine_return": {
+        "name": "Brine Return"
       },
-      "t_brine_out": {
-        "name": "Brine output temperature"
+      "t_production_return": {
+        "name": "Production Return"
       },
       "p_brine": {
         "name": "Brine pressure"
@@ -137,11 +137,11 @@
       "t_cooling_setpoint": {
         "name": "Cooling Tank setpoint"
       },
-      "t_prod_in": {
-        "name": "Production inlet temperature"
+      "t_production_supply": {
+        "name": "Production Supply"
       },
-      "t_prod_out": {
-        "name": "Production outlet temperature"
+      "t_brine_supply": {
+        "name": "Brine Supply"
       },
       "t_sg5": {
         "name": "SG5 temperature"

@@ -217,11 +217,11 @@ class TestEasnetGet:
     def test_t_outdoor(self):
         assert self.state["t_outdoor"] == pytest.approx(25.8)
 
-    def test_t_brine_in(self):
-        assert self.state["t_brine_in"] == pytest.approx(18.3)
+    def test_t_brine_return(self):
+        assert self.state["t_brine_return"] == pytest.approx(18.3)
 
-    def test_t_brine_out(self):
-        assert self.state["t_brine_out"] == pytest.approx(9.8)
+    def test_t_production_return(self):
+        assert self.state["t_production_return"] == pytest.approx(9.8)
 
     def test_p_brine(self):
         assert self.state["p_brine"] == pytest.approx(1.7)
@@ -278,14 +278,14 @@ class TestEasnetGet:
     def test_t_sg5_unconfigured_zero(self):
         assert self.state["t_sg5"] == pytest.approx(0.0)
 
-    # op 2148 – production circuit temps
-    def test_t_prod_in(self):
+    # op 2148 – production and brine supply temps
+    def test_t_production_supply(self):
         # 0041 = 65 → 6.5°C
-        assert self.state["t_prod_in"] == pytest.approx(6.5)
+        assert self.state["t_production_supply"] == pytest.approx(6.5)
 
-    def test_t_prod_out(self):
+    def test_t_brine_supply(self):
         # 00D8 = 216 → 21.6°C
-        assert self.state["t_prod_out"] == pytest.approx(21.6)
+        assert self.state["t_brine_supply"] == pytest.approx(21.6)
 
     # op 2151 – thermostat temps and zone regulation
     def test_t_thermostat_1_zero(self):

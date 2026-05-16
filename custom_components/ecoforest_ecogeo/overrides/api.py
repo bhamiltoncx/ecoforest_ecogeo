@@ -126,13 +126,13 @@ MAPPING = {
         "entity_type": "power",
         "value_fn": lambda data, raw: data["power_cooling"] + data["power_heating"]
     },
-    "t_brine_in": {
+    "t_brine_return": {
         "data_type": DataTypes.Register,
         "type": "float",
         "address": 2,
         "entity_type": "temperature"
     },
-    "t_brine_out": {
+    "t_production_return": {
         "data_type": DataTypes.Register,
         "type": "float",
         "address": 1,
@@ -246,13 +246,13 @@ MAPPING = {
         "address": None,
         "entity_type": "temperature"
     },
-    "t_prod_in": {
+    "t_production_supply": {
         "data_type": DataTypes.Register,
         "type": "float",
         "address": None,
         "entity_type": "temperature"
     },
-    "t_prod_out": {
+    "t_brine_supply": {
         "data_type": DataTypes.Register,
         "type": "float",
         "address": None,
@@ -462,8 +462,8 @@ MAPPING = {
 # Op 2151 – buffer/zone/DHW temperatures and setpoints
 EASYNET_INDEX = {
     "t_outdoor":      (2148, 21),
-    "t_brine_in":     (2148, 24),   # brine supply (in to brine circuit)
-    "t_brine_out":    (2148, 19),   # brine return (out of brine circuit)
+    "t_brine_return":       (2148, 24),   # trp: brine returning from wells to HP
+    "t_production_return":  (2148, 19),   # trc: production water returning from building
     "p_brine":        (2148, 20),   # brine circuit pressure
     "p_output":       (2148, 18),   # production circuit pressure
     "power_heating":  (2149,  1),
@@ -484,8 +484,8 @@ EASYNET_INDEX = {
     "number_dhw_dt_start":  (2151, 27),
     "t_cooling_setpoint":   (2151, 24),   # cool buffer tank setpoint (cbtsp)
     # Op 2148 – production circuit temps
-    "t_prod_in":            (2148, 22),   # tic: production circuit inlet
-    "t_prod_out":           (2148, 23),   # tip: production circuit outlet
+    "t_production_supply":  (2148, 22),   # tic: production water supplied to building
+    "t_brine_supply":       (2148, 23),   # tip: brine supplied from HP to wells
     # Op 2151 – zone 5 setpoints, thermostat temps, valve regulation
     "t_sg5":                (2151,  4),   # hdtsg5: zone 5 heating setpoint
     "t_thermostat_1":       (2151,  5),   # ti1: zone 1 thermostat actual temp
