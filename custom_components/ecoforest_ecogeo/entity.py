@@ -63,9 +63,18 @@ class EcoforestEntity(CoordinatorEntity[EcoforestCoordinator]):
         device_id = coordinator.data.model_name if device_alias is None else device_alias
         device_name = MANUFACTURER if device_alias is None else device_alias
 
+        if definition.get("is_number"):
+            domain = "number"
+        elif definition["entity_type"] == "switch":
+            domain = "switch"
+        elif definition["entity_type"] == "button":
+            domain = "button"
+        else:
+            domain = "sensor"
+
         id = f"{device_id}_{key}".lower()
         self._attr_unique_id = id
-        self.entity_id = f"sensor.{id}"
+        self.entity_id = f"{domain}.{id}"
 
         super().__init__(coordinator)
 
