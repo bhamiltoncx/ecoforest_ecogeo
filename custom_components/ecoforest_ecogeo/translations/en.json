@@ -143,6 +143,15 @@
       "t_brine_supply": {
         "name": "Brine Supply"
       },
+      "energy_electric_year": {
+        "name": "Electricity consumed (year)"
+      },
+      "energy_heating_year": {
+        "name": "Heating energy (year)"
+      },
+      "energy_cooling_year": {
+        "name": "Cooling energy (year)"
+      },
       "t_sg5": {
         "name": "SG5 temperature"
       },

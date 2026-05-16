@@ -258,6 +258,24 @@ MAPPING = {
         "address": None,
         "entity_type": "temperature"
     },
+    "energy_electric_year": {
+        "data_type": DataTypes.Register,
+        "type": "float",
+        "address": None,
+        "entity_type": "energy"
+    },
+    "energy_heating_year": {
+        "data_type": DataTypes.Register,
+        "type": "float",
+        "address": None,
+        "entity_type": "energy"
+    },
+    "energy_cooling_year": {
+        "data_type": DataTypes.Register,
+        "type": "float",
+        "address": None,
+        "entity_type": "energy"
+    },
     "t_sg5": {
         "data_type": DataTypes.Register,
         "type": "float",
@@ -534,6 +552,14 @@ EASYNET_REGISTER_WRITE = {
     "number_dhw_htr_set":  6104,
 }
 
+# Named-field ops: response lines are KEY=HEX rather than bare hex.
+# Op 2139 – yearly energy totals (kWh, value/10)
+EASYNET_NAMED_INDEX = {
+    "energy_electric_year": (2139, "YE"),
+    "energy_heating_year":  (2139, "YH"),
+    "energy_cooling_year":  (2139, "YAC"),
+}
+
 
 class EcoGeoApi(EcoforestApi):
     def __init__(
@@ -626,6 +652,7 @@ class EcoGeoApi(EcoforestApi):
         op2149 = await self._bulk(2149)
         op2150 = await self._bulk(2150)
         op2151 = await self._bulk(2151)
+        op2139 = await self._bulk(2139)
         alarm_code = await self._get_alarm_code()
 
         raw = {2148: op2148, 2149: op2149, 2150: op2150, 2151: op2151}
@@ -649,6 +676,11 @@ class EcoGeoApi(EcoforestApi):
             v = device_info.get(name)
             if MAPPING[name].get("entity_type") == "temperature" and v is not None and v <= -50.0:
                 device_info[name] = None
+
+        named_raw = {2139: op2139}
+        for name, (op, key) in EASYNET_NAMED_INDEX.items():
+            val = self._named_value(named_raw[op], key)
+            device_info[name] = self.parse_ecoforest_float(val) if val is not None else None
 
         # Computed / unavailable entries
         h = device_info.get("power_heating") or 0
@@ -801,6 +833,14 @@ class EcoGeoApi(EcoforestApi):
 
     def parse_ecoforest_float(self, value):
         return self.parse_ecoforest_int(value) / 10
+
+    def _named_value(self, values: list[str], key: str) -> str | None:
+        """Return the hex string for KEY= from a named-field op response, or None."""
+        prefix = f"{key}="
+        for v in values:
+            if v.startswith(prefix):
+                return v[len(prefix):]
+        return None
 
     def get_alarm(data):
         alarm_registers = [

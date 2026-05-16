@@ -6,7 +6,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 
 from homeassistant.components.sensor import SensorDeviceClass, SensorEntityDescription, SensorStateClass
-from homeassistant.const import UnitOfTemperature, UnitOfPower, UnitOfPressure
+from homeassistant.const import UnitOfTemperature, UnitOfPower, UnitOfPressure, UnitOfEnergy
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity import EntityDescription, generate_entity_id
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
@@ -22,7 +22,8 @@ SENSOR_TYPES = {
     "pressure": {"class": SensorDeviceClass.PRESSURE, "unit": UnitOfPressure.BAR, "state_class": SensorStateClass.MEASUREMENT},
     "power": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.WATT, "state_class": SensorStateClass.MEASUREMENT},
     "measurement": {"state_class": SensorStateClass.MEASUREMENT},
-    "enum": {"class": SensorDeviceClass.ENUM}
+    "enum": {"class": SensorDeviceClass.ENUM},
+    "energy": {"class": SensorDeviceClass.ENERGY, "unit": UnitOfEnergy.KILO_WATT_HOUR, "state_class": SensorStateClass.TOTAL_INCREASING}
 }
 
 

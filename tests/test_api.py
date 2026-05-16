@@ -28,6 +28,7 @@ api_mod = _load(_base / "overrides" / "api.py",
 EcoGeoApi = api_mod.EcoGeoApi
 MAPPING = api_mod.MAPPING
 EASYNET_INDEX = api_mod.EASYNET_INDEX
+EASYNET_NAMED_INDEX = api_mod.EASYNET_NAMED_INDEX
 EASYNET_SWITCH_WRITE = api_mod.EASYNET_SWITCH_WRITE
 EASYNET_REGISTER_WRITE = api_mod.EASYNET_REGISTER_WRITE
 OP_TYPE_SET_SWITCH = api_mod.OP_TYPE_SET_SWITCH
@@ -506,3 +507,41 @@ class TestSetNumericValue:
         api = _EasnetApi(FIXTURE)
         with pytest.raises(Exception, match="unknown register"):
             asyncio.run(api.set_numeric_value("nonexistent", 45.0))
+
+
+# ---------------------------------------------------------------------------
+# Yearly energy sensors (op 2139, named-field format)
+# ---------------------------------------------------------------------------
+
+class TestNamedValue:
+    api = _BareApi()
+
+    def test_finds_key(self):
+        assert self.api._named_value(["YAU=0000", "YH=03E8", "YE=007D"], "YH") == "03E8"
+
+    def test_missing_key_returns_none(self):
+        assert self.api._named_value(["YAU=0000", "YH=03E8"], "YE") is None
+
+    def test_prefix_not_confused_with_longer_key(self):
+        assert self.api._named_value(["YAU=0001", "YA=0002"], "YA") == "0002"
+
+
+class TestYearlyEnergy:
+    state = asyncio.run(_EasnetApi(FIXTURE).get()).state
+
+    def test_energy_electric_year(self):
+        # YE=007D = 125 → 12.5 kWh
+        assert self.state["energy_electric_year"] == pytest.approx(12.5)
+
+    def test_energy_heating_year(self):
+        # YH=03E8 = 1000 → 100.0 kWh
+        assert self.state["energy_heating_year"] == pytest.approx(100.0)
+
+    def test_energy_cooling_year(self):
+        # YAC=01F4 = 500 → 50.0 kWh
+        assert self.state["energy_cooling_year"] == pytest.approx(50.0)
+
+    def test_missing_key_yields_none(self):
+        # fixture has no "YMISSING=" field
+        bare = _BareApi()
+        assert bare._named_value(["YH=03E8"], "YMISSING") is None
