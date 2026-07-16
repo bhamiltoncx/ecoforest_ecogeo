@@ -230,29 +230,30 @@ class TestEasnetGet:
     def test_p_output(self):
         assert self.state["p_output"] == pytest.approx(1.1)
 
-    # op 2149 – power
+    # op 2149 – power. Registers report 0.1 kW steps; entities are W,
+    # so the parse scales ×100 (fixture raw: heating 0, cooling 104, electric 15).
     def test_power_heating_zero(self):
         assert self.state["power_heating"] == 0
 
     def test_power_cooling(self):
-        assert self.state["power_cooling"] == 104
+        assert self.state["power_cooling"] == 10400
 
     def test_power_electric(self):
-        assert self.state["power_electric"] == 15
+        assert self.state["power_electric"] == 1500
 
     def test_power_output_sum(self):
-        assert self.state["power_output"] == 104
+        assert self.state["power_output"] == 10400
 
     def test_cop(self):
         # Unit in pure cooling mode: heating power = 0, so heating COP = 0
         assert self.state["cop"] == pytest.approx(0.0)
 
     def test_eer(self):
-        # cooling=104, electric=15 → EER = 6.93
+        # cooling=10400 W, electric=1500 W → EER = 6.93
         assert self.state["eer"] == pytest.approx(6.93)
 
     def test_pf(self):
-        # (heating+cooling)/electric = 104/15 = 6.93
+        # (heating+cooling)/electric = 10400/1500 = 6.93
         assert self.state["pf"] == pytest.approx(6.93)
 
     # op 2151 – buffer / zone / DHW temps

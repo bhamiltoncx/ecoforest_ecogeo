@@ -700,6 +700,11 @@ class EcoGeoApi(EcoforestApi):
             if MAPPING[name].get("entity_type") == "temperature" and v is not None and v <= -50.0:
                 device_info[name] = None
 
+        # Op 2149 power registers report 0.1 kW steps; power entities are W
+        for name in ("power_heating", "power_cooling", "power_electric"):
+            if device_info.get(name) is not None:
+                device_info[name] = device_info[name] * 100
+
         named_raw = {2137: op2137, 2140: op2140}
         for name, (op, key) in EASYNET_NAMED_INDEX.items():
             val = self._named_value(named_raw[op], key)
