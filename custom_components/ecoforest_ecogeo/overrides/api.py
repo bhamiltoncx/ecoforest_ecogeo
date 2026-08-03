@@ -44,6 +44,31 @@ REQUESTS = {
     ]
 }
 
+def _delta(supply: float | None, ret: float | None) -> float | None:
+    """Return supply minus return, or None if either reading is unavailable."""
+    if supply is None or ret is None:
+        return None
+    return round(supply - ret, 2)
+
+
+def _buffer_error(data: dict[str, object]) -> float | None:
+    """Return buffer temperature minus the setpoint for the active mode.
+
+    Returns None when neither heating nor cooling is enabled, because there is
+    no setpoint to be in error against.
+    """
+    if data.get("switch_heating"):
+        setpoint = data.get("t_heating_setpoint")
+    elif data.get("switch_cooling"):
+        setpoint = data.get("t_cooling_setpoint")
+    else:
+        return None
+    buffer = data.get("t_heating")
+    if buffer is None or setpoint is None:
+        return None
+    return round(buffer - setpoint, 2)
+
+
 # MAPPING is the source of truth for entity discovery (keys, units, device class).
 # The "data_type" and "address" fields are used by the classic protocol.
 # Easynet G2 bulk-op reads are looked up in EASYNET_INDEX below.
@@ -125,6 +150,28 @@ MAPPING = {
         "type": "custom",
         "entity_type": "power",
         "value_fn": lambda data, raw: data["power_cooling"] + data["power_heating"]
+    },
+    "t_brine_delta": {
+        "data_type": DataTypes.Register,
+        "type": "derived",
+        "entity_type": "temperature_delta",
+        "value_fn": lambda data: _delta(
+            data.get("t_brine_supply"), data.get("t_brine_return")
+        ),
+    },
+    "t_production_delta": {
+        "data_type": DataTypes.Register,
+        "type": "derived",
+        "entity_type": "temperature_delta",
+        "value_fn": lambda data: _delta(
+            data.get("t_production_supply"), data.get("t_production_return")
+        ),
+    },
+    "t_buffer_error": {
+        "data_type": DataTypes.Register,
+        "type": "derived",
+        "entity_type": "temperature_delta",
+        "value_fn": lambda data: _buffer_error(data),
     },
     "t_brine_return": {
         "data_type": DataTypes.Register,
@@ -488,6 +535,20 @@ MAPPING = {
     }
 }
 
+#: Keys computed from other values rather than read from a register.
+DERIVED_KEYS = ("t_brine_delta", "t_production_delta", "t_buffer_error")
+
+
+def apply_derived(device_info: dict[str, object]) -> None:
+    """Populate the derived delta-T entries in place.
+
+    Called at the end of both protocol paths, after every source value has
+    been decoded and after temperature sentinels have been cleared to None.
+    """
+    for key in DERIVED_KEYS:
+        device_info[key] = MAPPING[key]["value_fn"](device_info)
+
+
 # ── Easynet G2 (Easynet gateway) specific data ────────────────────────────────
 #
 # The Easynet G2 exposes bulk read operations (2148, 2149, 2151) that return
@@ -646,6 +707,8 @@ class EcoGeoApi(EcoforestApi):
                 continue
             device_info[name] = definition["value_fn"](device_info, state)
 
+        apply_derived(device_info)
+
         _LOGGER.debug(device_info)
         _LOGGER.debug(state)
         return EcoGeoDevice.build(self.parse_model_name(state), device_info)
@@ -725,6 +788,7 @@ class EcoGeoApi(EcoforestApi):
                     "switch_pool_device_output", "button_reset_alarms"):
             device_info[key] = None
 
+        apply_derived(device_info)
         device_info["alarm"] = alarm_code
 
         _LOGGER.debug(device_info)
