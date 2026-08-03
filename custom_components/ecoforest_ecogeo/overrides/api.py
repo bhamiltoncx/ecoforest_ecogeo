@@ -69,6 +69,19 @@ def _buffer_error(data: dict[str, object]) -> float | None:
     return round(buffer - setpoint, 2)
 
 
+def _efficiency(output: float | None, electric: float | None) -> float | None:
+    """Ratio of thermal output to electrical input.
+
+    Returns None rather than 0.0 when there is no output in this mode: a heat
+    pump that is cooling has no heating COP, which is a different statement
+    from having a COP of zero. Reporting 0.0 pollutes long-term statistics and
+    flattens the scale of any graph the figure shares.
+    """
+    if not electric or not output:
+        return None
+    return round(output / electric, 2)
+
+
 # MAPPING is the source of truth for entity discovery (keys, units, device class).
 # The "data_type" and "address" fields are used by the classic protocol.
 # Easynet G2 bulk-op reads are looked up in EASYNET_INDEX below.
@@ -778,9 +791,9 @@ class EcoGeoApi(EcoforestApi):
         c = device_info.get("power_cooling") or 0
         e = device_info.get("power_electric")
         device_info["power_output"] = h + c
-        device_info["cop"] = round(h / e, 2) if e else None   # heating COP
-        device_info["eer"] = round(c / e, 2) if e else None   # cooling EER
-        device_info["pf"]  = round((h + c) / e, 2) if e else None  # combined PF
+        device_info["cop"] = _efficiency(h, e)        # heating COP
+        device_info["eer"] = _efficiency(c, e)        # cooling EER
+        device_info["pf"]  = _efficiency(h + c, e)    # combined PF
         device_info["number_dhw_htr_set"] = None
 
         # Switches not yet mapped on Easynet

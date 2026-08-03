@@ -25,6 +25,7 @@ api_mod = _load(_base / "overrides" / "api.py",
 apply_derived = api_mod.apply_derived
 DERIVED_KEYS = api_mod.DERIVED_KEYS
 MAPPING = api_mod.MAPPING
+_efficiency = api_mod._efficiency
 
 
 def test_all_derived_keys_are_mapped() -> None:
@@ -96,3 +97,21 @@ def test_derived_keys_are_always_present() -> None:
     for key in DERIVED_KEYS:
         assert key in info
         assert info[key] is None
+
+
+def test_efficiency_is_none_when_that_mode_is_idle() -> None:
+    """Cooling means no heating COP — not a COP of zero."""
+    assert api_mod._efficiency(0, 1000) is None
+
+
+def test_efficiency_is_none_when_the_compressor_is_off() -> None:
+    assert api_mod._efficiency(None, None) is None
+    assert api_mod._efficiency(6300, 0) is None
+
+
+def test_efficiency_computes_the_ratio_when_running() -> None:
+    assert api_mod._efficiency(6300, 1000) == 6.3
+
+
+def test_efficiency_rounds_to_two_places() -> None:
+    assert api_mod._efficiency(6350, 1017) == 6.24

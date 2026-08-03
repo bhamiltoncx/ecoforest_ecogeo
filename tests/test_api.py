@@ -245,8 +245,9 @@ class TestEasnetGet:
         assert self.state["power_output"] == 10400
 
     def test_cop(self):
-        # Unit in pure cooling mode: heating power = 0, so heating COP = 0
-        assert self.state["cop"] == pytest.approx(0.0)
+        # Unit in pure cooling mode: heating power = 0, so there is no
+        # heating COP to report (not a COP of zero).
+        assert self.state["cop"] is None
 
     def test_eer(self):
         # cooling=10400 W, electric=1500 W → EER = 6.93
