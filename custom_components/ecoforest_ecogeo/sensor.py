@@ -52,6 +52,11 @@ class EcoforestSensor(SensorEntity, EcoforestEntity):
     def native_value(self) -> StateType:
         """Return the state of the sensor."""
         if self.entity_description.value_fn is not None:
-            return self.entity_description.value_fn(self.data)
+            value = self.entity_description.value_fn(self.data)
+        else:
+            value = self.data.state[self.entity_description.key]
 
-        return self.data.state[self.entity_description.key]
+        if value is not None and self.entity_description.scale != 1.0:
+            return round(value * self.entity_description.scale, 2)
+
+        return value

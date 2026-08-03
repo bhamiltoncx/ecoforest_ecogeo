@@ -13,6 +13,7 @@ from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.typing import StateType
 
 from .const import DOMAIN, MANUFACTURER
+from .units import delta_unit_and_scale
 from .coordinator import EcoforestCoordinator
 from .overrides.device import EcoGeoDevice
 
@@ -23,7 +24,11 @@ SENSOR_TYPES = {
     "power": {"class": SensorDeviceClass.POWER, "unit": UnitOfPower.WATT, "state_class": SensorStateClass.MEASUREMENT},
     "measurement": {"state_class": SensorStateClass.MEASUREMENT},
     "enum": {"class": SensorDeviceClass.ENUM},
-    "energy": {"class": SensorDeviceClass.ENERGY, "unit": UnitOfEnergy.KILO_WATT_HOUR, "state_class": SensorStateClass.TOTAL_INCREASING}
+    "energy": {"class": SensorDeviceClass.ENERGY, "unit": UnitOfEnergy.KILO_WATT_HOUR, "state_class": SensorStateClass.TOTAL_INCREASING},
+    # Temperature intervals: no device_class, because Home Assistant would
+    # apply the affine absolute-temperature conversion. Unit and scale are
+    # resolved per entity in EcoforestEntity.__init__.
+    "temperature_delta": {"state_class": SensorStateClass.MEASUREMENT},
 }
 
 
@@ -32,6 +37,7 @@ class EcoforestSensorEntityDescription(SensorEntityDescription):
     """Describes Ecoforest sensor entity."""
 
     value_fn: Callable[[EcoGeoDevice], StateType] | None = None
+    scale: float = 1.0
 
 class EcoforestEntity(CoordinatorEntity[EcoforestCoordinator]):
     """Common Ecoforest entity using CoordinatorEntity."""
@@ -47,7 +53,18 @@ class EcoforestEntity(CoordinatorEntity[EcoforestCoordinator]):
     ) -> None:
         """Initialize device information."""
 
-        if definition["entity_type"] in SENSOR_TYPES.keys():
+        if definition["entity_type"] == "temperature_delta":
+            unit, scale = delta_unit_and_scale(
+                coordinator.hass.config.units.temperature_unit
+            )
+            self.entity_description = EcoforestSensorEntityDescription(
+                key=key,
+                translation_key=key,
+                native_unit_of_measurement=unit,
+                state_class=SENSOR_TYPES["temperature_delta"]["state_class"],
+                scale=scale,
+            )
+        elif definition["entity_type"] in SENSOR_TYPES.keys():
             self.entity_description = EcoforestSensorEntityDescription(
                 key=key,
                 translation_key=key,

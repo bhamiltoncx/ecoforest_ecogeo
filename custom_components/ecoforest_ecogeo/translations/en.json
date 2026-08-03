@@ -143,6 +143,9 @@
       "t_brine_supply": {
         "name": "Brine Supply"
       },
+      "t_brine_delta": { "name": "Brine ΔT" },
+      "t_production_delta": { "name": "Production ΔT" },
+      "t_buffer_error": { "name": "Buffer setpoint error" },
       "energy_electric_month": {
         "name": "Electricity consumed (month)"
       },
