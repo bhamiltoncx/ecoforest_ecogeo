@@ -27,6 +27,12 @@ def delta_unit_and_scale(temperature_unit: str) -> tuple[str, float]:
     :param temperature_unit: the unit Home Assistant is configured to display,
         i.e. ``hass.config.units.temperature_unit``.
     :return: the unit string to report, and the factor to multiply by.
+
+    This is called once from ``EcoforestEntity.__init__``, so the result is
+    resolved at entity construction time and fixed for the entity's
+    lifetime. If Home Assistant's unit system changes afterward, the
+    delta-T sensors keep reporting the old unit until the integration is
+    reloaded.
     """
     if str(temperature_unit) == FAHRENHEIT:
         return FAHRENHEIT, CELSIUS_TO_FAHRENHEIT_INTERVAL

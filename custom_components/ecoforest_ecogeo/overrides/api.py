@@ -165,7 +165,6 @@ MAPPING = {
         "value_fn": lambda data, raw: data["power_cooling"] + data["power_heating"]
     },
     "t_brine_delta": {
-        "data_type": DataTypes.Register,
         "type": "derived",
         "entity_type": "temperature_delta",
         "value_fn": lambda data: _delta(
@@ -173,7 +172,6 @@ MAPPING = {
         ),
     },
     "t_production_delta": {
-        "data_type": DataTypes.Register,
         "type": "derived",
         "entity_type": "temperature_delta",
         "value_fn": lambda data: _delta(
@@ -181,10 +179,9 @@ MAPPING = {
         ),
     },
     "t_buffer_error": {
-        "data_type": DataTypes.Register,
         "type": "derived",
         "entity_type": "temperature_delta",
-        "value_fn": lambda data: _buffer_error(data),
+        "value_fn": _buffer_error,
     },
     "t_brine_return": {
         "data_type": DataTypes.Register,
@@ -549,7 +546,7 @@ MAPPING = {
 }
 
 #: Keys computed from other values rather than read from a register.
-DERIVED_KEYS = ("t_brine_delta", "t_production_delta", "t_buffer_error")
+DERIVED_KEYS: tuple[str, ...] = ("t_brine_delta", "t_production_delta", "t_buffer_error")
 
 
 def apply_derived(device_info: dict[str, object]) -> None:
